@@ -41,7 +41,10 @@ const server = http.createServer((req, res) => {
   } else if (pathName === "/product") {
     res.end("This is an Product");
   } else {
-    res.writeHead(404, { "Content-type": "text/html" });
+    res.writeHead(404, {
+      "Content-type": "text/html",
+      "my-own-header": "Hello World",
+    });
     res.end("<h1>Page not found</h1>");
   }
 });
@@ -49,3 +52,13 @@ const server = http.createServer((req, res) => {
 server.listen(8000, "127.0.0.1", () => {
   console.log("Listening to request from port 8000");
 });
+
+// const server = http.createServer((req, res) => {
+//   const pathName = req.url;
+
+//   res.end("Hellow from server :3");
+// });
+
+// server.listen(8000, "127.0.0.1", () => {
+//   console.log("Hellow, listening now");
+// });
