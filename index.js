@@ -39,7 +39,20 @@ const server = http.createServer((req, res) => {
   if (pathName === "/" || pathName === "/overview") {
     res.end("This is an Overview");
   } else if (pathName === "/product") {
-    res.end("This is an Product");
+    res.end("This is a Product");
+  } else if (pathName === "/api") {
+    //
+    //read file from JSON format data
+    //
+    fs.readFile(`${__dirname}/dev-data/data.json`, "utf-8", (err, data) => {
+      //
+      //JSON parsed data
+      //
+      const productData = JSON.parse(data);
+      res.writeHead(200, { "content-type": "application/json" });
+      res.end(data);
+      console.log(productData);
+    });
   } else {
     res.writeHead(404, {
       "Content-type": "text/html",
