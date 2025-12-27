@@ -33,26 +33,51 @@ const url = require("url");
 
 //==============================================================================================
 //SERVER
+//
+//replaceTemp function
+const replaceTemplate = (temp, product) => {
+  let output = temp.replace(/{%ProductName%}/g, product.productName);
+};
+//Read Template Overview
+const temptOverview = fs.readFileSync(
+  `${__dirname}/templates/template-overview.html`,
+  "utf-8"
+);
+//Read Template Card
+const temptCard = fs.readFileSync(
+  `${__dirname}/templates/template-card.html`,
+  "utf-8"
+);
+//Read Product
+const temptProduct = fs.readFileSync(
+  `${__dirname}/templates/product.html`,
+  "utf-8"
+);
+
+const data = fs.readFileSync(`${__dirname}/dev-data/data.json`, "utf-8"); //Read the data once
+
+const dataObj = JSON.parse(data); //Parse JSON data
 
 const server = http.createServer((req, res) => {
   const pathName = req.url;
+
+  //Overview Page
   if (pathName === "/" || pathName === "/overview") {
-    res.end("This is an Overview");
+    res.writeHead(200, { "content-type": "text/html" });
+
+    const cardsHtml = dataObj.map((el) => replaceTemplate(temptCard, el));
+    res.end(temptOverview);
+
+    //Product Page
   } else if (pathName === "/product") {
     res.end("This is a Product");
+
+    //Api Page
   } else if (pathName === "/api") {
-    //
-    //read file from JSON format data
-    //
-    fs.readFile(`${__dirname}/dev-data/data.json`, "utf-8", (err, data) => {
-      //
-      //JSON parsed data
-      //
-      const productData = JSON.parse(data);
-      res.writeHead(200, { "content-type": "application/json" });
-      res.end(data);
-      console.log(productData);
-    });
+    res.writeHead(200, { "content-type": "application/json" });
+    res.end(data);
+
+    //Not Found
   } else {
     res.writeHead(404, {
       "Content-type": "text/html",
