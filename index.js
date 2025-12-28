@@ -37,6 +37,17 @@ const url = require("url");
 //replaceTemp function
 const replaceTemplate = (temp, product) => {
   let output = temp.replace(/{%ProductName%}/g, product.productName);
+  output = output.replace(/{%Image%}/g, product.image);
+  output = output.replace(/{%ProductPrice%}/g, product.price);
+  output = output.replace(/{%From%}/g, product.from);
+  output = output.replace(/{%ProductNutrients%}/g, product.nutrients);
+  output = output.replace(/{%ProductQauntity%}/g, product.quantity);
+  output = output.replace(/{%Description%}/g, product.description);
+  output = output.replace(/{%Id%}/g, product.id);
+
+  if (!product.organic)
+    output = output.replace(/{%Not_Organic%}/g, "not-organic");
+  return output;
 };
 //Read Template Overview
 const temptOverview = fs.readFileSync(
@@ -65,8 +76,12 @@ const server = http.createServer((req, res) => {
   if (pathName === "/" || pathName === "/overview") {
     res.writeHead(200, { "content-type": "text/html" });
 
-    const cardsHtml = dataObj.map((el) => replaceTemplate(temptCard, el));
-    res.end(temptOverview);
+    const cardsHtml = dataObj
+      .map((el) => replaceTemplate(temptCard, el))
+      .join("");
+    console.log(cardsHtml);
+    const output = temptOverview.replace("{%Product_Cards%}", cardsHtml);
+    res.end(output);
 
     //Product Page
   } else if (pathName === "/product") {
