@@ -2,6 +2,7 @@ const fs = require("fs");
 const http = require("http");
 const path = require("path");
 const url = require("url");
+const replaceTemplate = require("./modules/replaceTemplate");
 
 // const hello = "Hello World";
 // console.log(hello);
@@ -34,21 +35,7 @@ const url = require("url");
 //==============================================================================================
 //SERVER
 //
-//replaceTemp function
-const replaceTemplate = (temp, product) => {
-  let output = temp.replace(/{%ProductName%}/g, product.productName);
-  output = output.replace(/{%Image%}/g, product.image);
-  output = output.replace(/{%ProductPrice%}/g, product.price);
-  output = output.replace(/{%From%}/g, product.from);
-  output = output.replace(/{%ProductNutrients%}/g, product.nutrients);
-  output = output.replace(/{%ProductQauntity%}/g, product.quantity);
-  output = output.replace(/{%Description%}/g, product.description);
-  output = output.replace(/{%Id%}/g, product.id);
 
-  if (!product.organic)
-    output = output.replace(/{%Not_Organic%}/g, "not-organic");
-  return output;
-};
 //Read Template Overview
 const temptOverview = fs.readFileSync(
   `${__dirname}/templates/template-overview.html`,
@@ -70,25 +57,29 @@ const data = fs.readFileSync(`${__dirname}/dev-data/data.json`, "utf-8"); //Read
 const dataObj = JSON.parse(data); //Parse JSON data
 
 const server = http.createServer((req, res) => {
-  const pathName = req.url;
+  const { query, pathname } = url.parse(req.url, true);
+  console.log(pathname);
 
   //Overview Page
-  if (pathName === "/" || pathName === "/overview") {
+  if (pathname === "/" || pathname === "/overview") {
     res.writeHead(200, { "content-type": "text/html" });
 
     const cardsHtml = dataObj
       .map((el) => replaceTemplate(temptCard, el))
       .join("");
-    console.log(cardsHtml);
+
     const output = temptOverview.replace("{%Product_Cards%}", cardsHtml);
     res.end(output);
 
     //Product Page
-  } else if (pathName === "/product") {
-    res.end("This is a Product");
+  } else if (pathname === "/product") {
+    res.writeHead(200, { "content-type": "text/html" });
+    const product = dataObj[query.id];
+    const output = replaceTemplate(temptProduct, product);
+    res.end(output);
 
     //Api Page
-  } else if (pathName === "/api") {
+  } else if (pathname === "/api") {
     res.writeHead(200, { "content-type": "application/json" });
     res.end(data);
 
@@ -107,7 +98,7 @@ server.listen(8000, "127.0.0.1", () => {
 });
 
 // const server = http.createServer((req, res) => {
-//   const pathName = req.url;
+//   const pathname = req.url;
 
 //   res.end("Hellow from server :3");
 // });
